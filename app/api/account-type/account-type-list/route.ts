@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
 
     return Response.json(accountTypeList);
   } catch (error) {
+    console.error(error);
     return Response.json(error, { status: 500 });
   }
 }

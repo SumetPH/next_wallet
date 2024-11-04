@@ -6,15 +6,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    const accountId = await z
-      .string()
-      .parseAsync(req.nextUrl.searchParams.get("accountId") || null);
-
-    const accountDetail = await sql`
-     SELECT * FROM account WHERE id=${accountId} limit 1
+    const transactionTypeList = await sql`
+      SELECT * FROM transaction_type
     `;
 
-    return Response.json(accountDetail[0]);
+    return Response.json(transactionTypeList);
   } catch (error) {
     console.error(error);
     return Response.json(error, { status: 500 });

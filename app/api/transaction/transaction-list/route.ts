@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
         atft.id as account_transfer_to_id,
         atft.name as account_transfer_to_name,
         to_char(t.updated_at, 'YYYY-MM-DD') as date,
-        to_char(t.updated_at, 'HH:mm:ss') as time 
+        to_char(t.updated_at, 'HH24:MI:SS') as time 
       from 
         "transaction" t
       left join transaction_type tt
@@ -51,11 +51,12 @@ export async function GET(req: NextRequest) {
           ? sql`where ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId}`
           : sql``
       }
-      order by t.updated_at desc
+      order by t.updated_at asc
     `;
 
     return Response.json(transactionList);
   } catch (error) {
+    console.error(error);
     return Response.json(error, { status: 500 });
   }
 }

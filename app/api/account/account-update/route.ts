@@ -25,6 +25,7 @@ export async function PUT(req: NextRequest) {
 
     return Response.json(updateAccount[0]);
   } catch (error) {
+    console.error(error);
     return Response.json(error, { status: 500 });
   }
 }

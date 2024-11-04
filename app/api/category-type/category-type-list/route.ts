@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
 
     return Response.json(categoryTypeList);
   } catch (error) {
+    console.error(error);
     return Response.json(error, { status: 500 });
   }
 }
