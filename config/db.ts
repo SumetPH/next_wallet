@@ -1,20 +1,12 @@
 import postgres from "postgres";
 
 const sql = postgres({
-  host: "localhost",
-  username: "sumetph",
-  password: "sumet",
-  database: "flutter_wallet",
-  port: 5432,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  port: Number(process.env.DB_PORT),
+  ssl: process.env.DB_SSL === "true",
 });
-
-// const sql = postgres({
-//   host: "ep-lucky-base-56244334-pooler.ap-southeast-1.aws.neon.tech",
-//   username: "default",
-//   password: "uThym10vDgzF",
-//   database: "verceldb",
-//   port: 5432,
-//   ssl: true,
-// });
 
 export default sql;

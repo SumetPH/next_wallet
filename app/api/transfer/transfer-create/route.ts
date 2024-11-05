@@ -11,9 +11,13 @@ export async function POST(req: NextRequest) {
       note: z.string().optional(),
       accountIdFrom: z.number(),
       accountIdTo: z.number(),
+      date: z.string(),
+      time: z.string(),
     });
 
     const body = await schema.parseAsync(await req.json());
+
+    const date = new Date(`${body.date} ${body.time}`);
 
     const createTransaction = await sql<{ id: number }[]>`
         INSERT INTO transaction(
@@ -27,8 +31,8 @@ export async function POST(req: NextRequest) {
           ${body.amount},
           ${body.note ?? ""},
           ${3},
-          ${new Date()},
-          ${new Date()}
+          ${date},
+          ${date}
         )
         RETURNING id
     `;
@@ -45,8 +49,8 @@ export async function POST(req: NextRequest) {
             ${createTransaction[0].id},
             ${body.accountIdFrom},
             ${body.accountIdTo},
-            ${new Date()},
-            ${new Date()}
+            ${date},
+            ${date}
         )
         RETURNING *
     `;

@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
         atft.id as account_transfer_to_id,
         atft.name as account_transfer_to_name,
         to_char(t.updated_at, 'YYYY-MM-DD') as date,
-        to_char(t.updated_at, 'HH24:MI:SS') as time 
+        to_char(t.updated_at, 'HH24:MI') as time 
       from 
         "transaction" t
       left join transaction_type tt
