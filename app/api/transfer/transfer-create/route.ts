@@ -55,7 +55,10 @@ export async function POST(req: NextRequest) {
         RETURNING *
     `;
 
-    return Response.json({ createTransaction, createTransfer });
+    return Response.json({
+      createTransaction: createTransaction[0],
+      createTransfer: createTransfer[0],
+    });
   } catch (error) {
     console.error(error);
     return Response.json(error, { status: 500 });

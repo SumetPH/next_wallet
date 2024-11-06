@@ -18,25 +18,13 @@ export async function DELETE(req: NextRequest) {
     `;
 
     if (transaction.length > 0) {
-      // delete expense
-      if (transaction[0].transaction_type_id === 1) {
-        await sql`
-          DELETE FROM expense
+      // delete transfer
+      await sql`
+          DELETE FROM transfer
           WHERE
             transaction_id=${transactionId}
           RETURNING *
         `;
-      }
-
-      // delete income
-      if (transaction[0].transaction_type_id === 2) {
-        await sql`
-          DELETE FROM income
-          WHERE
-            transaction_id=${transactionId}
-          RETURNING *
-        `;
-      }
 
       // delete transaction
       const deleteTransaction = await sql`

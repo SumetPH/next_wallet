@@ -23,39 +23,32 @@ export async function GET(req: NextRequest) {
     `;
 
     if (detail.length > 0) {
-      if (detail[0].transaction_type_id === 1) {
-        const expense = await sql`
-          SELECT 
-            ae.id as account_id,
-            ae.name as account_name
-          FROM expense e
-          LEFT JOIN account ae
-            ON ae.id = e.account_id
-          WHERE e.transaction_id = ${transactionId}
-        `;
-        detail[0].account_id = expense[0].account_id;
-        detail[0].account_name = expense[0].account_name;
-      } else {
-        const income = await sql`
-          SELECT 
-            ai.id as account_id,
-            ai.name as account_name
-          FROM income i
-          LEFT JOIN account ai
-            ON ai.id = i.account_id
-          WHERE i.transaction_id = ${transactionId}
-        `;
-        detail[0].account_id = income[0].account_id;
-        detail[0].account_name = income[0].account_name;
-      }
+      const transfer = await sql`
+        SELECT
+          af.id as account_id_from,
+          af.name as account_name_from,
+          at.id as account_id_to,
+          at.name as account_name_to
+        FROM transfer
+        LEFT JOIN account af
+          on af.id = transfer.account_id_from
+        LEFT JOIN account at
+          on at.id = transfer.account_id_to
+        WHERE transaction_id = ${transactionId}
+        LIMIT 1
+      `;
+
+      detail[0].account_id_from = transfer[0].account_id_from;
+      detail[0].account_name_from = transfer[0].account_name_from;
+      detail[0].account_id_to = transfer[0].account_id_to;
+      detail[0].account_name_to = transfer[0].account_name_to;
+      return Response.json(detail[0]);
     } else {
       return Response.json(
         { message: "Transaction not found" },
         { status: 404 }
       );
     }
-
-    return Response.json(detail[0]);
   } catch (error) {
     console.error(error);
     return Response.json(error, { status: 500 });
