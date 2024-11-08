@@ -48,18 +48,20 @@ export async function POST(req: NextRequest) {
         )
       `;
 
-      await sql`
-        INSERT INTO 
-          category(id, name, category_type_id) 
-        VALUES
-          (1, 'อาหาร', 1),
-          (2, 'ใช้จ่าย', 1),
-          (3, 'อื่นๆ', 1),
-          (4, 'เงินเดือน', 2),
-          (5, 'ใช้คืน', 2),
-          (6, 'อื่นๆ', 2)
-        ON CONFLICT DO NOTHING
-      `;
+      const categoryList = await sql`select * from category`;
+      if (categoryList.length === 0) {
+        await sql`
+          INSERT INTO 
+            category(name, category_type_id) 
+            VALUES
+            ('อาหาร', 1),
+            ('ใช้จ่าย', 1),
+            ('อื่นๆ', 1),
+            ('เงินเดือน', 2),
+            ('ใช้คืน', 2),
+            ('อื่นๆ', 2)
+        `;
+      }
 
       await sql`
         CREATE TABLE IF NOT EXISTS category_type(
