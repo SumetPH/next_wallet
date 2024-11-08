@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
         INSERT INTO 
           category_type(id, name) 
         VALUES
-          (1, 'รายจ่าย')
-          (2, 'รายรับ'),
+          (1, 'รายจ่าย'),
+          (2, 'รายรับ')
         ON CONFLICT DO NOTHING
       `;
 
