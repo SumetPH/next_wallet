@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const accountId = req.nextUrl.searchParams.get("accountId");
+    const categoryId = req.nextUrl.searchParams.get("categoryId");
 
     const transactionList = await sql`
       select 
@@ -56,11 +57,13 @@ export async function GET(req: NextRequest) {
         on adf.id = d.account_id_from
       left join account adt
         on adt.id = d.account_id_to
+      where 1 = 1
       ${
         accountId
-          ? sql`where ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId}`
+          ? sql`and ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId}`
           : sql``
       }
+      ${categoryId ? sql`and t.category_id = ${categoryId}` : sql``}
       order by t.updated_at asc
     `;
 

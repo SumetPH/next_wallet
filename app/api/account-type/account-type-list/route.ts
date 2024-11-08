@@ -6,7 +6,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const accountTypeList = await sql`
-      SELECT * FROM account_type
+      select * from account_type
+      order by id
     `;
 
     return Response.json(accountTypeList);
