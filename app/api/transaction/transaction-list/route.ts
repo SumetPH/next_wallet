@@ -63,7 +63,11 @@ export async function GET(req: NextRequest) {
           ? sql`and ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId}`
           : sql``
       }
-      ${categoryId ? sql`and t.category_id = ${categoryId}` : sql``}
+      ${
+        categoryId
+          ? sql`and t.category_id in ${sql(categoryId.split(","))}`
+          : sql``
+      }
       order by t.updated_at asc
     `;
 

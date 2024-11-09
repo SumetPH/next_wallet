@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
             note,
             transaction_type_id,
             category_id,
-            created_at,
             updated_at
         )
         VALUES(
@@ -34,7 +33,6 @@ export async function POST(req: NextRequest) {
             ${body.note ?? ""},
             ${body.transactionTypeId},
             ${body.categoryId},
-            ${date},
             ${date}
         )
         RETURNING id
