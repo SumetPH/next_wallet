@@ -27,16 +27,18 @@ export async function POST(req: NextRequest) {
         )
       `;
 
-      await sql`
-       INSERT INTO 
-          account_type(id, name) 
-        VALUES
-          (1, 'เงินสด'),
-          (2, 'ธนาคาร'),
-          (3, 'บัตรเครดิต'),
-          (4, 'หนี้สิน')
-        ON CONFLICT DO NOTHING
-      `;
+      const accountTypeList = await sql`select * from account_type`;
+      if (accountTypeList.length === 0) {
+        await sql`
+          INSERT INTO 
+            account_type(id, name) 
+          VALUES
+            (1, 'เงินสด'),
+            (2, 'ธนาคาร'),
+            (3, 'บัตรเครดิต'),
+            (4, 'หนี้สิน')
+        `;
+      }
 
       await sql`
         CREATE TABLE IF NOT EXISTS category(
@@ -72,14 +74,16 @@ export async function POST(req: NextRequest) {
         )
       `;
 
-      await sql`
-        INSERT INTO 
-          category_type(id, name) 
-        VALUES
-          (1, 'รายจ่าย'),
-          (2, 'รายรับ')
-        ON CONFLICT DO NOTHING
+      const categoryTypeList = await sql`select * from category_type`;
+      if (categoryTypeList.length === 0) {
+        await sql`
+          INSERT INTO 
+            category_type(id, name) 
+          VALUES
+            (1, 'รายจ่าย'),
+            (2, 'รายรับ')
       `;
+      }
 
       await sql`
         CREATE TABLE IF NOT EXISTS transaction(
@@ -102,16 +106,18 @@ export async function POST(req: NextRequest) {
         )
       `;
 
-      await sql`
-        INSERT INTO 
-          transaction_type(id, name) 
-        VALUES
-          (1, 'รายจ่าย'),
-          (2, 'รายรับ'),
-          (3, 'โอน'),
-          (4, 'ชำระหนี้')
-        ON CONFLICT DO NOTHING
-      `;
+      const transactionTypeList = await sql`select * from transaction_type`;
+      if (transactionTypeList.length === 0) {
+        await sql`
+          INSERT INTO 
+            transaction_type(id, name) 
+          VALUES
+            (1, 'รายจ่าย'),
+            (2, 'รายรับ'),
+            (3, 'โอน'),
+            (4, 'ชำระหนี้')
+        `;
+      }
 
       await sql`
         CREATE TABLE IF NOT EXISTS expense(
@@ -152,6 +158,27 @@ export async function POST(req: NextRequest) {
           account_id_to INTEGER,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `;
+
+      await sql`
+        create table if not exists budget(
+          id serial primary key,
+          name text,
+          amount numeric(10, 2),
+          start_date int,
+          created_at timestamp default current_timestamp,
+          updated_at timestamp default current_timestamp
+        )
+      `;
+
+      await sql`
+        create table if not exists budget_category(
+          id serial primary key,
+          budget_id int,
+          category_id int,
+          created_at timestamp default current_timestamp,
+          updated_at timestamp default current_timestamp
         )
       `;
 
