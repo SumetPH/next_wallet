@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
           name Text,
           category_type_id INTEGER,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          order INTEGER
         )
       `;
 
