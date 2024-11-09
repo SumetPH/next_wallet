@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
-export async function PATCH(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
     const orderSchema = z.object({
       categoryId: z.number(),
