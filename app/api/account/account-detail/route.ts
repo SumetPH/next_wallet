@@ -14,6 +14,10 @@ export async function GET(req: NextRequest) {
      SELECT * FROM account WHERE id=${accountId} limit 1
     `;
 
+    if (accountDetail.length === 0) {
+      return Response.json({ message: "account not found" }, { status: 404 });
+    }
+
     return Response.json(accountDetail[0]);
   } catch (error) {
     console.error(error);

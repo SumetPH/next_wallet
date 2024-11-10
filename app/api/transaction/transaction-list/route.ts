@@ -11,28 +11,32 @@ export async function GET(req: NextRequest) {
 
     const transactionList = await sql`
       select 
-        t.id as id,
-        t.amount as amount,
-        t.transaction_type_id as transaction_type_id,
-        tt.name as transaction_type_name,
-        t.category_id as category_id,
-        c.name as category_name,
-        ae.id as expense_account_id,
-        ae.name as expense_account_name,
-        ai.id as income_account_id,
-        ai.name as income_account_name,
-        atff.id as transfer_account_id_from,
-        atff.name as transfer_account_name_from,
-        atft.id as transfer_account_id_to,
-        atft.name as transfer_account_name_to,
-        adf.id as debt_account_id_from,
-        adf.name as debt_account_name_from,
-        adt.id as debt_account_id_to,
-        adt.name as debt_account_name_to,
-        to_char(t.updated_at, 'YYYY-MM-DD') as date,
-        to_char(t.updated_at, 'HH24:MI') as time 
-      from 
-        "transaction" t
+        to_char(date_trunc('day', t.updated_at), 'YYYY-MM-DD') as day,
+        json_agg(
+          json_build_object(
+            'id', t.id,
+            'amount', TO_CHAR(t.amount, 'FM99999.00'),
+            'transaction_type_id', t.transaction_type_id,
+            'transaction_type_name', tt.name,
+            'category_id', t.category_id,
+            'category_name', c.name,
+            'expense_account_id', ae.id,
+            'expense_account_name', ae.name,
+            'income_account_id', ai.id,
+            'income_account_name', ai.name,
+            'transfer_account_id_from', atff.id,
+            'transfer_account_name_from', atff.name,
+            'transfer_account_id_to', atft.id,
+            'transfer_account_name_to', atft.name,
+            'debt_account_id_from', adf.id,
+            'debt_account_name_from', adf.name,
+            'debt_account_id_to', adt.id,
+            'debt_account_name_to', adt.name,
+            'date', to_char(t.updated_at, 'YYYY-MM-DD'),
+            'time', to_char(t.updated_at, 'HH24:MI')
+          ) 
+        ) as transaction_list
+      from "transaction" t 
       left join transaction_type tt
         on tt.id = t.transaction_type_id 
       left join category c 
@@ -58,17 +62,18 @@ export async function GET(req: NextRequest) {
       left join account adt
         on adt.id = d.account_id_to
       where 1 = 1
-      ${
-        accountId
-          ? sql`and ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId}`
-          : sql``
-      }
+     ${
+       accountId
+         ? sql`and ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId}`
+         : sql``
+     }
       ${
         categoryId
           ? sql`and t.category_id in ${sql(categoryId.split(","))}`
           : sql``
       }
-      order by t.updated_at asc
+      group by day
+      order by day desc
     `;
 
     return Response.json(transactionList);

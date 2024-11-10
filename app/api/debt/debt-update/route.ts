@@ -14,6 +14,7 @@ export async function PUT(req: NextRequest) {
       time: z.string(),
       accountIdFrom: z.number(),
       accountIdTo: z.number(),
+      categoryId: z.number().optional(),
     });
 
     const body = await schema.parseAsync(await req.json());
@@ -25,7 +26,8 @@ export async function PUT(req: NextRequest) {
         SET
           amount=${body.amount},
           note=${body.note ?? ""},
-          updated_at=${date}
+          updated_at=${date},
+          category_id=${body.categoryId ?? null}
         WHERE
           id=${body.transactionId}
         RETURNING *

@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
       accountIdTo: z.number(),
       date: z.string(),
       time: z.string(),
+      categoryId: z.number().optional(),
     });
 
     const body = await schema.parseAsync(await req.json());
@@ -25,14 +26,16 @@ export async function POST(req: NextRequest) {
           note,
           transaction_type_id,
           created_at,
-          updated_at
+          updated_at,
+          category_id
         )
         VALUES(
           ${body.amount},
           ${body.note ?? ""},
           ${4},
           ${date},
-          ${date}
+          ${date},
+          ${body.categoryId ?? null}
         )
         RETURNING id
     `;

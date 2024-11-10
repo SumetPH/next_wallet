@@ -17,9 +17,13 @@ export async function GET(req: NextRequest) {
       t.note as note,
       t.transaction_type_id as transaction_type_id,
       t.category_id as category_id,
+      c.name as category_name,
       to_char(t.updated_at, 'YYYY-MM-DD') as date,
       to_char(t.updated_at, 'HH24:MI:SS') as time
-     FROM transaction t WHERE id=${transactionId} limit 1
+     FROM transaction t 
+     LEFT JOIN category c
+     ON c.id = t.category_id
+     WHERE t.id=${transactionId} limit 1
     `;
 
     if (detail.length > 0) {
