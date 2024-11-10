@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
         b.id,
         b.name,
         b.amount,
+        b.start_date,
         coalesce(
           (
             select sum(t.amount) 
