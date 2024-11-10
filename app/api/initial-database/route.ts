@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
           amount NUMERIC(10, 2),
           account_type_id INTEGER,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          order INTEGER
         )
       `;
 
@@ -167,17 +168,18 @@ export async function POST(req: NextRequest) {
           id serial primary key,
           name text,
           amount numeric(10, 2),
-          start_date int,
+          start_date integer,
           created_at timestamp default current_timestamp,
-          updated_at timestamp default current_timestamp
+          updated_at timestamp default current_timestamp,
+          order integer
         )
       `;
 
       await sql`
         create table if not exists budget_category(
           id serial primary key,
-          budget_id int,
-          category_id int,
+          budget_id integer,
+          category_id integer,
           created_at timestamp default current_timestamp,
           updated_at timestamp default current_timestamp
         )

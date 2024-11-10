@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         FROM account a
         LEFT JOIN account_type at ON at.id = a.account_type_id
         ${body.type ? sql`WHERE account_type_id IN ${sql([body.type])}` : sql``}
-        ORDER BY a.name
+        ORDER BY a.order
     `;
 
     return Response.json(accountList);
