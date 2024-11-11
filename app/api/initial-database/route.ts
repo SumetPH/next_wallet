@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
           account_type_id INTEGER,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          order INTEGER
+          order INTEGER,
+          icon_path TEXT
         )
       `;
 

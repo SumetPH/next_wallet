@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
             a.name,
             a.amount,
             a.account_type_id,
+            a.icon_path,
             (
               a.amount -- initial
               -

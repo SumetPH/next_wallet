@@ -11,15 +11,20 @@ export async function PUT(req: NextRequest) {
       name: z.string(),
       amount: z.number(),
       accountTypeId: z.number(),
+      iconPath: z.string().optional(),
     });
 
     const body = await schema.parseAsync(await req.json());
 
     const updateAccount = await sql`
       UPDATE account 
-      SET name=${body.name}, amount=${body.amount}, account_type_id=${
-      body.accountTypeId
-    }, updated_at=${new Date()} WHERE id=${body.accountId}
+      SET 
+        name=${body.name},
+        amount=${body.amount}, 
+        account_type_id=${body.accountTypeId}, 
+        icon_path=${body.iconPath ?? null},
+        updated_at=${new Date()} 
+      WHERE id=${body.accountId}
       RETURNING *
     `;
 

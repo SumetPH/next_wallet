@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
             'date', to_char(t.updated_at, 'YYYY-MM-DD'),
             'time', to_char(t.updated_at, 'HH24:MI')
           ) 
+          order by t.updated_at
         ) as transaction_list
       from "transaction" t 
       left join transaction_type tt

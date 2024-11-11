@@ -10,15 +10,21 @@ export async function POST(req: NextRequest) {
       name: z.string(),
       amount: z.number(),
       accountTypeId: z.number(),
+      iconPath: z.string().optional(),
     });
 
     const body = await schema.parseAsync(await req.json());
 
     const createAccount = await sql`
       INSERT INTO account
-        (name, amount, account_type_id)
+        (name, amount, account_type_id, icon_path)
       VALUES
-        (${body.name}, ${body.amount}, ${body.accountTypeId})
+        (
+          ${body.name},
+          ${body.amount},
+          ${body.accountTypeId},
+          ${body.iconPath ?? null}
+        )
       RETURNING *
     `;
 
