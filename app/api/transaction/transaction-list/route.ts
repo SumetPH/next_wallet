@@ -8,6 +8,8 @@ export async function GET(req: NextRequest) {
   try {
     const accountId = req.nextUrl.searchParams.get("accountId");
     const categoryId = req.nextUrl.searchParams.get("categoryId");
+    const startDate = req.nextUrl.searchParams.get("startDate");
+    const endDate = req.nextUrl.searchParams.get("endDate");
 
     const transactionList = await sql`
       select 
@@ -33,7 +35,8 @@ export async function GET(req: NextRequest) {
             'debt_account_id_to', adt.id,
             'debt_account_name_to', adt.name,
             'date', to_char(t.updated_at, 'YYYY-MM-DD'),
-            'time', to_char(t.updated_at, 'HH24:MI')
+            'time', to_char(t.updated_at, 'HH24:MI'),
+            'note', t.note
           ) 
           order by t.updated_at
         ) as transaction_list
@@ -65,13 +68,21 @@ export async function GET(req: NextRequest) {
       where 1 = 1
      ${
        accountId
-         ? sql`and ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId}`
+         ? sql`and (ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId})`
          : sql``
      }
       ${
         categoryId
           ? sql`and t.category_id in ${sql(categoryId.split(","))}`
           : sql``
+      }
+      ${
+        startDate
+          ? sql`and date_trunc('day', t.updated_at) >= ${startDate}`
+          : sql``
+      }
+      ${
+        endDate ? sql`and date_trunc('day', t.updated_at) <= ${endDate}` : sql``
       }
       group by day
       order by day desc

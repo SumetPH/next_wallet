@@ -186,6 +186,16 @@ export async function POST(req: NextRequest) {
         )
       `;
 
+      await sql`
+        create table if not exists account_credit(
+          id serial primary key,
+          account_id integer,
+          credit_start_date integer,
+          created_at timestamp default current_timestamp,
+          updated_at timestamp default current_timestamp
+        )
+      `;
+
       return "success";
     });
 

@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
             a.amount,
             a.account_type_id,
             a.icon_path,
+            ac.credit_start_date,
             (
               a.amount -- initial
               -
@@ -89,8 +90,10 @@ export async function POST(req: NextRequest) {
               ) -- debt in
             ) AS balance
           FROM account a
+          left join account_credit ac
+          on ac.account_id = a.id
           WHERE a.account_type_id = ${accountType.id}
-          ORDER BY a.order
+          ORDER BY a.order, a.name
       `;
 
       const total = accountList.reduce((p, c) => p + Number(c.balance), 0);

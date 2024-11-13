@@ -9,18 +9,18 @@ export async function GET(req: NextRequest) {
     const accountId = await z
       .string()
       .parseAsync(req.nextUrl.searchParams.get("accountId") || null);
-    const startDate = await z
+    const creditStartDate = await z
       .string()
-      .parseAsync(req.nextUrl.searchParams.get("startDate") || null);
+      .parseAsync(req.nextUrl.searchParams.get("creditStartDate") || null);
 
-    const startDateNumber = parseInt(startDate) - 1;
+    const creditStartDateNumber = parseInt(creditStartDate) - 1;
     const datePeriod = await sql`
         select
           to_char((
             case 
-              when extract(day from t.updated_at) > ${startDateNumber}
-              then date_trunc('month', t.updated_at) + (interval '1 days' * ${startDateNumber})
-              else date_trunc('month', t.updated_at) - interval '1 month' + (interval '1 days' * ${startDateNumber})
+              when extract(day from t.updated_at) > ${creditStartDateNumber}
+              then date_trunc('month', t.updated_at) + (interval '1 days' * ${creditStartDateNumber})
+              else date_trunc('month', t.updated_at) - interval '1 month' + (interval '1 days' * ${creditStartDateNumber})
             end
           ), 'YYYY-MM-DD') as date_period
         from "transaction" t 
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       `;
 
     if (datePeriod.length === 0) {
-      return Response.json({ message: "account not found" }, { status: 404 });
+      return Response.json([]);
     }
 
     const startDatePeriod = datePeriod[0].date_period;
@@ -73,9 +73,9 @@ export async function GET(req: NextRequest) {
       ) t
       on (
         case
-          when extract(day from t.updated_at) > ${startDateNumber}
-          then date_trunc('month', t.updated_at) + (interval '1 days' * ${startDateNumber})
-          else date_trunc('month', t.updated_at) - interval '1 month' + (interval '1 days' * ${startDateNumber})
+          when extract(day from t.updated_at) > ${creditStartDateNumber}
+          then date_trunc('month', t.updated_at) + (interval '1 days' * ${creditStartDateNumber})
+          else date_trunc('month', t.updated_at) - interval '1 month' + (interval '1 days' * ${creditStartDateNumber})
         end
       ) = date_period
       left join expense e
