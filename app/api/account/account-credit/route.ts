@@ -46,8 +46,8 @@ export async function GET(req: NextRequest) {
 
     const accountCredit = await sql`
       select
-        to_char(date_period, 'DD/MM/YYYY') as start_date,
-        to_char(date_period + interval '1 month' - interval '1 day', 'DD/MM/YYYY') as end_date,
+        to_char(date_period, 'YYYY-MM-DD') as start_date,
+        to_char(date_period + interval '1 month' - interval '1 day', 'YYYY-MM-DD') as end_date,
         sum(
           case
             when ae.account_type_id = 3 or adf.account_type_id = 3
