@@ -11,7 +11,8 @@ export async function PUT(req: NextRequest) {
       name: z.string(),
       amount: z.number(),
       accountTypeId: z.number(),
-      iconPath: z.string().optional(),
+      iconPath: z.string().nullable().optional(),
+      creditStartDate: z.number().nullable().optional(),
     });
 
     const body = await schema.parseAsync(await req.json());
@@ -27,6 +28,17 @@ export async function PUT(req: NextRequest) {
       WHERE id=${body.accountId}
       RETURNING *
     `;
+
+    // if account type is credit update account credit
+    if (body.accountTypeId === 3 && body.creditStartDate) {
+      await sql`
+        update account_credit
+        set 
+          credit_start_date=${body.creditStartDate},
+          updated_at=${new Date()}
+        where account_id=${body.accountId}
+      `;
+    }
 
     return Response.json(updateAccount[0]);
   } catch (error) {

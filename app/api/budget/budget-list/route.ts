@@ -36,9 +36,9 @@ export async function GET(req: NextRequest) {
         ) as balance,
         b.created_at,
         b.updated_at,
-        b.order 
+        b.order_index 
       from budget b 
-      order by b.order
+      order by b.order_index
     `;
 
     for (const budget of budgetList) {

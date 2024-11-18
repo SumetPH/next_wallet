@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
           left join account_credit ac
           on ac.account_id = a.id
           WHERE a.account_type_id = ${accountType.id}
-          ORDER BY a.order, a.name
+          ORDER BY a.order_index, a.name
       `;
 
       const total = accountList.reduce((p, c) => p + Number(c.balance), 0);

@@ -39,6 +39,9 @@ export async function DELETE(req: NextRequest) {
       await sql`
         DELETE FROM account WHERE id = ${accountId}
       `;
+      await sql`
+        DELETE FROM account_credit WHERE account_id = ${accountId}
+      `;
       return "deleted";
     });
 

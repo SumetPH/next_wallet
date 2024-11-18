@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
         coalesce(sum(t.amount),0.00) as amount,
         c.created_at as created_at,
         c.updated_at as updated_at,
-        c.order
+        c.order_index
       from category c
       left join
         category_type ct
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
            : sql``
        }
        group by c.id, c.category_type_id, ct.name
-      order by c.order
+      order by c.order_index
     `;
 
     return Response.json(categoryList);

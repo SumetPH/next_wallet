@@ -6,16 +6,16 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const msg = await sql.begin(async (sql) => {
+    await sql.begin(async (sql) => {
       await sql`
         CREATE TABLE IF NOT EXISTS account(
-          id SERIAL PRIMARY KEY, 
-          name TEXT, 
+          id SERIAL PRIMARY KEY,
+          name TEXT,
           amount NUMERIC(10, 2),
           account_type_id INTEGER,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          order INTEGER,
+          order_index INTEGER,
           icon_path TEXT
         )
       `;
@@ -44,20 +44,20 @@ export async function POST(req: NextRequest) {
 
       await sql`
         CREATE TABLE IF NOT EXISTS category(
-          id SERIAL PRIMARY KEY,  
+          id SERIAL PRIMARY KEY,
           name Text,
           category_type_id INTEGER,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          order INTEGER
+          order_index INTEGER
         )
       `;
 
       const categoryList = await sql`select * from category`;
       if (categoryList.length === 0) {
         await sql`
-          INSERT INTO 
-            category(name, category_type_id) 
+          INSERT INTO
+            category(name, category_type_id)
             VALUES
             ('อาหาร', 1),
             ('ใช้จ่าย', 1),
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
           start_date integer,
           created_at timestamp default current_timestamp,
           updated_at timestamp default current_timestamp,
-          order integer
+          order_index integer
         )
       `;
 

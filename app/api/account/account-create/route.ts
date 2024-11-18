@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
       name: z.string(),
       amount: z.number(),
       accountTypeId: z.number(),
-      iconPath: z.string().optional(),
+      iconPath: z.string().nullable().optional(),
+      creditStartDate: z.number().nullable().optional(),
     });
 
     const body = await schema.parseAsync(await req.json());
@@ -27,6 +28,26 @@ export async function POST(req: NextRequest) {
         )
       RETURNING *
     `;
+
+    // if account type is credit create account credit
+    if (body.accountTypeId === 3) {
+      await sql`
+        insert into account_credit
+          (
+            account_id,
+            credit_start_date,
+            created_at,
+            updated_at
+          )
+        values
+          (
+            ${createAccount[0].id},
+            ${body.creditStartDate ?? null},
+            ${new Date()},
+            ${new Date()}
+          )
+      `;
+    }
 
     return Response.json(createAccount[0]);
   } catch (error) {

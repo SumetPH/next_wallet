@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest) {
       for (const order of body.list) {
         await sql`
           update account
-          set "order"=${order.order}
+          set "order_index"=${order.order}
           where id=${order.accountId}
         `;
       }
