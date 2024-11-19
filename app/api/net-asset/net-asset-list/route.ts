@@ -1,0 +1,50 @@
+import { NextRequest } from "next/server";
+import sql from "@/config/db";
+import { z } from "zod";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(req: NextRequest) {
+  try {
+    const propertyList = await sql`
+      select 
+        a.id as id,
+        a.name as name,
+        (
+          case
+            when na.type = 1 then
+              true
+            else
+              false
+          end
+        ) as is_property
+      from account a
+      left join net_asset na
+      on na.account_id = a.id
+      order by a.account_type_id, a.order_index
+    `;
+
+    const debtList = await sql`
+    select 
+      a.id as id,
+      a.name as name,
+      (
+        case
+          when na.type = 2 then
+            true
+          else
+            false
+        end
+      ) as is_debt
+    from account a
+    left join net_asset na
+    on na.account_id = a.id
+    order by a.account_type_id, a.order_index
+  `;
+
+    return Response.json({ propertyList, debtList });
+  } catch (error) {
+    console.error(error);
+    return Response.json(error, { status: 500 });
+  }
+}

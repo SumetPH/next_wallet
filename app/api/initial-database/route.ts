@@ -196,6 +196,16 @@ export async function POST(req: NextRequest) {
         )
       `;
 
+      await sql`
+        create table if not exists net_asset(
+          id serial primary key,
+          account_id integer,
+          type integer, -- 1 = ทรัพย์สิน, 2 = หนี้สิน
+          created_at timestamp default current_timestamp,
+          updated_at timestamp default current_timestamp 
+        )
+      `;
+
       return "success";
     });
 
