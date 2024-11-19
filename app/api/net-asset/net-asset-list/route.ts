@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
         a.name as account_name,
         (
           case
-            when na.type = 1 then
+            when na.type = 2 then
               true
             else
               false
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
       a.name as account_name,
       (
         case
-          when na.type = 2 then
+          when na.type = 1 then
             true
           else
             false
