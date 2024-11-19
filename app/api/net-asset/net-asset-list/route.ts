@@ -8,8 +8,8 @@ export async function GET(req: NextRequest) {
   try {
     const propertyList = await sql`
       select 
-        a.id as id,
-        a.name as name,
+        a.id as account_id,
+        a.name as account_name,
         (
           case
             when na.type = 1 then
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
             else
               false
           end
-        ) as is_property
+        ) as status
       from account a
       left join net_asset na
       on na.account_id = a.id
@@ -26,8 +26,8 @@ export async function GET(req: NextRequest) {
 
     const debtList = await sql`
     select 
-      a.id as id,
-      a.name as name,
+      a.id as account_id,
+      a.name as account_name,
       (
         case
           when na.type = 2 then
@@ -35,14 +35,14 @@ export async function GET(req: NextRequest) {
           else
             false
         end
-      ) as is_debt
+      ) as status
     from account a
     left join net_asset na
     on na.account_id = a.id
     order by a.account_type_id, a.order_index
   `;
 
-    return Response.json({ propertyList, debtList });
+    return Response.json({ property_list: propertyList, debt_list: debtList });
   } catch (error) {
     console.error(error);
     return Response.json(error, { status: 500 });
