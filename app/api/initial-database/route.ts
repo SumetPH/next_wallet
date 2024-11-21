@@ -206,6 +206,32 @@ export async function POST(req: NextRequest) {
         )
       `;
 
+      await sql`
+        create table if not exists schedule(
+          id serial primary key,
+          name text,
+          start_date timestamp,
+          end_date timestamp,
+          order_index integer,
+          created_at timestamp default current_timestamp,
+          updated_at timestamp default current_timestamp
+        )
+      `;
+
+      await sql`
+        create table if not exists schedule_transaction(
+          id serial primary key,
+          schedule_id integer,
+          amount numeric(10, 2),
+          transaction_type_id integer,
+          transaction_id integer,
+          status text default 'pending', -- pending, completed
+          date timestamp,
+          created_at timestamp default current_timestamp,
+          updated_at timestamp default current_timestamp
+        )
+      `;
+
       return "success";
     });
 

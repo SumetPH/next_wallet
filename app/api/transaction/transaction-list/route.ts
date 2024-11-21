@@ -76,13 +76,11 @@ export async function GET(req: NextRequest) {
           ? sql`and t.category_id in ${sql(categoryId.split(","))}`
           : sql``
       }
+      ${startDate ? sql`and t.updated_at >= ${startDate}::date` : sql``}
       ${
-        startDate
-          ? sql`and date_trunc('day', t.updated_at) >= ${startDate}`
+        endDate
+          ? sql`and t.updated_at < (${endDate}::date + interval '1 day')`
           : sql``
-      }
-      ${
-        endDate ? sql`and date_trunc('day', t.updated_at) <= ${endDate}` : sql``
       }
       group by day
       order by day desc

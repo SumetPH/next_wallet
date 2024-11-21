@@ -13,26 +13,29 @@ export async function GET(req: NextRequest) {
         b.start_date,
         coalesce(
           (
-            select sum(t.amount) 
-            from "transaction" t 
-            where t.category_id in (
-              select bc.category_id 
-              from budget_category bc 
-              where bc.budget_id = b.id
-            )
-           	and (
-              date_trunc('month', current_date)
-              -
-              interval '1 month'
-              +
-              interval '1 days' * (b.start_date - 1)  
-            )::date <= t.updated_at
-            and (
-              date_trunc('month', current_date)
-              +
-              interval '1 days' * (b.start_date - 1) 
-            )::date >= t.updated_at 
-          ),0.00
+            select sum(t.amount)
+            from "transaction" t
+            join budget_category bc on bc.category_id = t.category_id
+            where bc.budget_id = b.id
+            and t.updated_at >= (
+              date_trunc('month', 
+                case 
+                  when extract(day from current_date) < b.start_date 
+                  then current_date - interval '1 month'
+                  else current_date
+                end
+              ) + make_interval(days => b.start_date - 1)
+            )::date
+            and t.updated_at < (
+              date_trunc('month',
+                case 
+                  when extract(day from current_date) < b.start_date 
+                  then current_date - interval '1 month'
+                  else current_date
+                end
+              ) + interval '1 month' + make_interval(days => b.start_date - 2)
+            )::date
+          ), 0.00
         ) as balance,
         b.created_at,
         b.updated_at,
