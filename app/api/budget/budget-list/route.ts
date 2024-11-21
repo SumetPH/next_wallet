@@ -11,6 +11,26 @@ export async function GET(req: NextRequest) {
         b.name,
         b.amount,
         b.start_date,
+        to_char(
+          date_trunc('month', 
+            case 
+              when extract(day from current_date) < b.start_date 
+              then current_date - interval '1 month'
+              else current_date
+            end
+          ) + make_interval(days => b.start_date - 1),
+          'YYYY-MM-DD'
+        ) as period_start_date,
+        to_char(
+          date_trunc('month', 
+            case 
+              when extract(day from current_date) < b.start_date 
+              then current_date - interval '1 month'
+              else current_date
+            end
+          ) + interval '1 month' + make_interval(days => b.start_date - 2),
+          'YYYY-MM-DD'
+        ) as period_end_date,
         coalesce(
           (
             select sum(t.amount)
