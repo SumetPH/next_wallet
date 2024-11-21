@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
                   then current_date - interval '1 month'
                   else current_date
                 end
-              ) + interval '1 month' + make_interval(days => b.start_date - 2)
+              ) + interval '1 month' + make_interval(days => b.start_date - 1)
             )::date
           ), 0.00
         ) as balance,
