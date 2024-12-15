@@ -2,23 +2,6 @@ import sql from "@/config/db";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-/**
- * API endpoint to get list of schedule transactions for a specific schedule
- *
- * @param request - NextRequest object containing:
- *   - scheduleId: string - ID of the schedule to get transactions for (in query params)
- *
- * @returns Response with:
- *   - 200: Array of schedule transaction objects containing:
- *     - id: number - Schedule transaction ID
- *     - amount: number - Amount for the scheduled transaction
- *     - date: string - Transaction date in YYYY-MM-DD format
- *     - status: string - Transaction status ('pending' or 'completed')
- *     - transaction_id: number - ID of the created transaction if status is 'completed'
- *     - transaction_type_id: number - ID of the transaction type
- *   - 404: Error object if schedule not found
- *   - 500: Error object if validation or database error occurs
- */
 export async function GET(request: NextRequest) {
   try {
     // Get scheduleId from query params and validate
@@ -32,13 +15,29 @@ export async function GET(request: NextRequest) {
         st.id as id,
         s.amount as amount,
         to_char(st.date, 'YYYY-MM-DD') as date, -- Format date as YYYY-MM-DD
-        st.status as status, -- pending or completed
+        (
+          case
+            when st.status = 'pending' then 'ยังไม่จ่าย'
+            else 'จ่ายแล้ว'
+          end
+        ) as status, -- pending or completed
         st.transaction_id as transaction_id,
-        s.transaction_type_id as transaction_type_id
+        s.transaction_type_id as transaction_type_id,
+        ste.account_id as expense_account_id,
+        aste.name as expense_account_name,
+        std.account_id_from as debt_account_id_from,
+        astdf.name as debt_account_name_from,
+        std.account_id_to as debt_account_id_to,
+        astdt.name as debt_account_name_to
       from schedule_transaction st
       left join schedule s on st.schedule_id = s.id
+      left join schedule_template_expense ste on ste.schedule_id = s.id
+      left join account aste on aste.id = ste.account_id
+      left join schedule_template_debt std on std.schedule_id = s.id
+      left join account astdf on astdf.id = std.account_id_from
+      left join account astdt on astdt.id = std.account_id_to
       where st.schedule_id = ${scheduleId}
-      order by st.date desc
+      order by st.date asc
     `;
 
     // Return 404 if no transactions found

@@ -12,8 +12,6 @@ export async function POST(req: NextRequest) {
 
     const body = await schema.parseAsync(await req.json());
 
-    console.log(body.type);
-
     const accountTypeList = await sql`
       SELECT * FROM account_type at
      ${body.type ? sql`where at.id in ${sql(body.type)}` : sql``}

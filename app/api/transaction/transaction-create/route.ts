@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       `;
     }
 
-    return Response.json({ createTransaction });
+    return Response.json({ createTransaction: createTransaction[0] });
   } catch (error) {
     console.error(error);
     return Response.json(error, { status: 500 });

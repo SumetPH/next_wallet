@@ -232,6 +232,23 @@ export async function POST(req: NextRequest) {
         )
       `;
 
+      await sql`
+        create table if not exists schedule_template_debt (
+          id serial4 not null primary key,
+          account_id_from int4 null,
+          account_id_to int4 null,
+          schedule_id int4 null
+        );
+      `;
+
+      await sql`
+        create table if not exists schedule_template_expense (
+          id serial4 not null primary key,
+          schedule_id int4 null,
+          account_id int4 null,
+        );
+      `;
+
       return "success";
     });
 
