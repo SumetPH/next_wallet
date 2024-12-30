@@ -245,7 +245,7 @@ export async function POST(req: NextRequest) {
         create table if not exists schedule_template_expense (
           id serial4 not null primary key,
           schedule_id int4 null,
-          account_id int4 null,
+          account_id int4 null
         );
       `;
 
