@@ -10,8 +10,9 @@ export async function POST(req: NextRequest) {
       amount: z.number(),
       note: z.string().optional(),
       transactionTypeId: z.number(),
-      accountId: z.number(),
-      categoryId: z.number(),
+      categoryId: z.number().nullable(),
+      accountIdFrom: z.number(),
+      accountIdTo: z.number().nullable(),
       date: z.string(),
       time: z.string(),
     });
@@ -26,6 +27,8 @@ export async function POST(req: NextRequest) {
             note,
             transaction_type_id,
             category_id,
+            account_id_from,
+            account_id_to,
             updated_at
         )
         VALUES(
@@ -33,46 +36,12 @@ export async function POST(req: NextRequest) {
             ${body.note ?? ""},
             ${body.transactionTypeId},
             ${body.categoryId},
+            ${body.accountIdFrom},
+            ${body.accountIdTo},
             ${date}
         )
         RETURNING id
     `;
-
-    // expense
-    if (body.transactionTypeId === 1) {
-      await sql`
-        INSERT INTO expense(
-            transaction_id,
-            account_id,
-            created_at,
-            updated_at
-        )
-        VALUES(
-            ${createTransaction[0].id},
-            ${body.accountId},
-            ${date},
-            ${date}
-        )
-      `;
-    }
-
-    // income
-    if (body.transactionTypeId === 2) {
-      await sql`
-        INSERT INTO income(
-            transaction_id,
-            account_id,
-            created_at,
-            updated_at
-        )
-        VALUES(
-            ${createTransaction[0].id},
-            ${body.accountId},
-            ${date},
-            ${date}
-        )
-      `;
-    }
 
     return Response.json({ createTransaction: createTransaction[0] });
   } catch (error) {

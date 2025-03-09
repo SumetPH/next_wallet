@@ -14,28 +14,21 @@ export async function GET(req: NextRequest) {
       .parseAsync(req.nextUrl.searchParams.get("creditStartDate") || null);
 
     const creditStartDateNumber = parseInt(creditStartDate) - 1;
+
     const datePeriod = await sql`
-        select
-          to_char((
-            case 
-              when extract(day from t.updated_at) > ${creditStartDateNumber}
-              then date_trunc('month', t.updated_at) + (interval '1 days' * ${creditStartDateNumber})
-              else date_trunc('month', t.updated_at) - interval '1 month' + (interval '1 days' * ${creditStartDateNumber})
-            end
-          ), 'YYYY-MM-DD') as date_period
-        from "transaction" t 
-        left join expense e 
-        on e.transaction_id = t.id 
-        left join debt d 
-        on d.transaction_id = t.id 
-        left join account adf
-        on adf.id = d.account_id_from 
-        left join account adt
-        on adt.id = d.account_id_to 
-        where e.account_id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId}
-        group by date_period
-        order by date_period
-      `;
+      select
+        to_char((
+          case 
+            when extract(day from t.updated_at) > ${creditStartDateNumber}
+            then date_trunc('month', t.updated_at) + (interval '1 days' * ${creditStartDateNumber})
+            else date_trunc('month', t.updated_at) - interval '1 month' + (interval '1 days' * ${creditStartDateNumber})
+          end
+        ), 'YYYY-MM-DD') as date_period
+      from "transaction" t 
+      where t.account_id_from = ${accountId} or t.account_id_to = ${accountId}
+      group by date_period
+      order by date_period
+    `;
 
     if (datePeriod.length === 0) {
       return Response.json([]);
@@ -48,67 +41,45 @@ export async function GET(req: NextRequest) {
       select
         to_char(date_period, 'YYYY-MM-DD') as start_date,
         to_char(date_period + interval '1 month' - interval '1 day', 'YYYY-MM-DD') as end_date,
-        sum(
-          case
-            when ae.account_type_id = 3 or adf.account_type_id = 3
-            then t.amount
-            else 0
-          end
-        ) as expense,
-        sum(
-          case
-            when adt.account_type_id = 3
-            then t.amount
-            else 0
-          end
+       coalesce( (
+          select sum(-t.amount)
+          from transaction t
+          where t.account_id_from = ${accountId} and t.updated_at >= date_period and t.updated_at < date_period + interval '1 month'
+        ), 0.00) as expense,
+        coalesce(
+          (
+          select sum(t.amount)
+          from transaction t
+          where t.account_id_to = ${accountId} and t.updated_at >= date_period and t.updated_at < date_period + interval '1 month'
+        ), 0.00
         ) as income
       from generate_series(
         ${startDatePeriod}::date,
         ${endDatePeriod}::date,
         '1 month'::interval
       ) as date_period
-      left join (
-        select * from transaction ts
-        where ts.transaction_type_id in (1,4)
-      ) t
-      on (
-        case
-          when extract(day from t.updated_at) > ${creditStartDateNumber}
-          then date_trunc('month', t.updated_at) + (interval '1 days' * ${creditStartDateNumber})
-          else date_trunc('month', t.updated_at) - interval '1 month' + (interval '1 days' * ${creditStartDateNumber})
-        end
-      ) = date_period
-      left join expense e
-      on e.transaction_id = t.id
-      left join (
-        select * from account aes
-        where aes.id = ${accountId}
-      ) ae
-      on ae.id = e.account_id
-      left join debt d
-      on d.transaction_id = t.id
-      left join (
-        select * from account adfs
-        where adfs.id = ${accountId}
-      ) adf
-      on adf.id = d.account_id_from
-      left join (
-        select * from account adts
-        where adts.id = ${accountId}
-      ) adt
-      on adt.id = d.account_id_to
       group by date_period
-      order by date_period desc
+      order by date_period asc
     `;
 
-    let income = 0;
-    for (const account of accountCredit) {
-      account.balance = (income - Number(account.expense)).toFixed(2);
-      account.expense = (-1 * Number(account.expense)).toFixed(2);
-      income = Number(account.income);
+    let balance = 0;
+    let debt = 0;
+
+    for (const i in accountCredit) {
+      const index = parseInt(i);
+      if (index === 0) {
+        debt = Number(accountCredit[index].expense);
+        accountCredit[index].balance = balance.toFixed(2);
+        accountCredit[index].debt = debt;
+      } else {
+        balance = debt + Number(accountCredit[index].income);
+        debt = balance + Number(accountCredit[index].expense);
+        accountCredit[index].debt = debt.toFixed(2);
+        accountCredit[index].balance = balance.toFixed(2);
+      }
     }
 
-    return Response.json(accountCredit);
+    return Response.json(accountCredit.reverse());
   } catch (error) {
     console.error(error);
     return Response.json(error, { status: 500 });

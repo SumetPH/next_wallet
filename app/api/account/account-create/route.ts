@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
     // if account type is credit create account credit
     if (body.accountTypeId === 3) {
       await sql`
-        insert into account_credit
+        INSERT INTO account_credit
           (
             account_id,
             credit_start_date,
             created_at,
             updated_at
           )
-        values
+        VALUES
           (
             ${createAccount[0].id},
             ${body.creditStartDate ?? null},

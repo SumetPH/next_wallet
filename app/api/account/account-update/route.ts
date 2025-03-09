@@ -24,21 +24,11 @@ export async function PUT(req: NextRequest) {
         amount=${body.amount}, 
         account_type_id=${body.accountTypeId}, 
         icon_path=${body.iconPath ?? null},
-        updated_at=${new Date()} 
+        updated_at=${new Date()},
+        credit_start_date=${body.creditStartDate ?? null}
       WHERE id=${body.accountId}
       RETURNING *
     `;
-
-    // if account type is credit update account credit
-    if (body.accountTypeId === 3 && body.creditStartDate) {
-      await sql`
-        update account_credit
-        set 
-          credit_start_date=${body.creditStartDate},
-          updated_at=${new Date()}
-        where account_id=${body.accountId}
-      `;
-    }
 
     return Response.json(updateAccount[0]);
   } catch (error) {

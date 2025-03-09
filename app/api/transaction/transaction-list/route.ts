@@ -17,58 +17,35 @@ export async function GET(req: NextRequest) {
         json_agg(
           json_build_object(
             'id', t.id,
-            'amount', TO_CHAR(t.amount, 'FM99999.00'),
-            'transaction_type_id', t.transaction_type_id,
+            'amount', t.amount,
+            'note', t.note,
+            'updated_at', t.updated_at,
+            'created_at', t.created_at,
+            'transaction_type_id', tt.id,
             'transaction_type_name', tt.name,
-            'category_id', t.category_id,
+            'category_id', c.id,
             'category_name', c.name,
-            'expense_account_id', ae.id,
-            'expense_account_name', ae.name,
-            'income_account_id', ai.id,
-            'income_account_name', ai.name,
-            'transfer_account_id_from', atff.id,
-            'transfer_account_name_from', atff.name,
-            'transfer_account_id_to', atft.id,
-            'transfer_account_name_to', atft.name,
-            'debt_account_id_from', adf.id,
-            'debt_account_name_from', adf.name,
-            'debt_account_id_to', adt.id,
-            'debt_account_name_to', adt.name,
+            'category_type_id', ct.id,
+            'category_type_name', ct.name,
+            'account_id_from', af.id,
+            'account_id_from_name', af.name,
+            'account_id_to', at.id,
+            'account_id_to_name', at.name,
             'date', to_char(t.updated_at, 'YYYY-MM-DD'),
-            'time', to_char(t.updated_at, 'HH24:MI'),
-            'note', t.note
-          ) 
-          order by t.updated_at
+            'time', to_char(t.updated_at, 'HH24:MI')
+          )
+          order by t.updated_at desc
         ) as transaction_list
       from "transaction" t 
-      left join transaction_type tt
-        on tt.id = t.transaction_type_id 
-      left join category c 
-        on c.id = t.category_id 
-      left join expense e
-        on e.transaction_id = t.id
-      left join account ae
-        on ae.id = e.account_id 
-      left join income i
-        on i.transaction_id =t.id 
-      left join account ai
-        on ai.id = i.account_id 
-      left join transfer tf
-        on tf.transaction_id = t.id
-      left join account atff
-        on atff.id = tf.account_id_from
-      left join account atft
-        on atft.id = tf.account_id_to
-      left join debt d
-        on d.transaction_id = t.id
-      left join account adf
-        on adf.id = d.account_id_from
-      left join account adt
-        on adt.id = d.account_id_to
+      left join transaction_type tt on tt.id = t.transaction_type_id
+      left join category c on c.id = t.category_id
+      left join category_type ct on ct.id = c.category_type_id
+      left join account af on af.id = t.account_id_from
+      left join account at on at.id = t.account_id_to
       where 1 = 1
      ${
        accountId
-         ? sql`and (ae.id = ${accountId} or ai.id = ${accountId} or atff.id = ${accountId} or atft.id = ${accountId} or adf.id = ${accountId} or adt.id = ${accountId})`
+         ? sql`and (af.id = ${accountId} or at.id = ${accountId})`
          : sql``
      }
       ${

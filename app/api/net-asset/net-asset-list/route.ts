@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
       from account a
       left join net_asset na
       on na.account_id = a.id
+      where a.account_type_id = 1 or a.account_type_id = 2
       order by a.account_type_id, a.order_index
     `;
 
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
     from account a
     left join net_asset na
     on na.account_id = a.id
+    where a.account_type_id = 3 or a.account_type_id = 4
     order by a.account_type_id, a.order_index
   `;
 

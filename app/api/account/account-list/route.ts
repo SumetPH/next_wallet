@@ -20,81 +20,21 @@ export async function POST(req: NextRequest) {
 
     for (const accountType of accountTypeList) {
       const accountList = await sql`
-          SELECT 
-            a.id,
-            a.name,
-            a.amount,
-            a.account_type_id,
-            a.icon_path,
-            ac.credit_start_date,
-            (
-              a.amount -- initial
-              -
-              COALESCE (
-                (
-                  SELECT SUM(t.amount) 
-                  FROM transaction t 
-                  LEFT JOIN expense e 
-                  ON e.transaction_id = t.id
-                  WHERE t.transaction_type_id = 1 AND e.account_id = a.id
-                ),0
-              ) -- expense
-              +
-              COALESCE (
-                (
-                  SELECT SUM(t.amount) 
-                  FROM transaction t 
-                    LEFT JOIN income i 
-                  ON i.transaction_id = t.id
-                  WHERE t.transaction_type_id = 2	AND i.account_id = a.id		
-                ),0
-              ) -- income
-              -
-              COALESCE (
-                (
-                  SELECT SUM(t.amount) 
-                  FROM transaction t 
-                  LEFT JOIN transfer tf
-                  ON tf.transaction_id = t.id
-                  WHERE t.transaction_type_id = 3 AND tf.account_id_from = a.id 
-                ),0
-              ) -- transfer out
-              +
-              COALESCE (
-                (
-                  SELECT SUM(t.amount) 
-                  FROM transaction t 
-                  LEFT JOIN transfer tf
-                  ON tf.transaction_id = t.id
-                  WHERE t.transaction_type_id = 3 AND tf.account_id_to = a.id 
-                ),0
-              ) -- transfer IN
-              -
-              COALESCE (
-                (
-                  SELECT SUM(t.amount) 
-                  FROM transaction t 
-                  LEFT JOIN debt d
-                  ON d.transaction_id = t.id
-                  WHERE t.transaction_type_id = 4 AND d.account_id_from = a.id 
-                ),0
-              ) -- debt out
-              +
-              COALESCE (
-                (
-                  SELECT SUM(t.amount) 
-                  FROM transaction t 
-                  LEFT JOIN debt d
-                  ON d.transaction_id = t.id
-                  WHERE t.transaction_type_id = 4 AND d.account_id_to = a.id 
-                ),0
-              ) -- debt in
-            ) AS balance
-          FROM account a
-          left join account_credit ac
-          on ac.account_id = a.id
-          WHERE a.account_type_id = ${accountType.id}
-          ORDER BY a.order_index, a.name
+        SELECT 
+          a.*,
+          COALESCE(SUM(
+              CASE 
+                  WHEN t.account_id_to = a.id THEN t.amount  -- รายรับ & เงินเข้า
+                  WHEN t.account_id_from = a.id THEN -t.amount  -- รายจ่าย & เงินออก
+                  ELSE 0 
+              END
+          ), 0) + a.amount AS balance
+        FROM account a
+        LEFT JOIN transaction t 
+          ON a.id = t.account_id_to OR a.id = t.account_id_from
+        WHERE a.account_type_id = ${accountType.id} and a.is_hidden = false
+        GROUP BY a.id, a.name
+        ORDER BY a.order_index, a.name;
       `;
 
       const total = accountList.reduce((p, c) => p + Number(c.balance), 0);

@@ -19,7 +19,7 @@ export async function PUT(req: NextRequest) {
 
     const body = await schema.parseAsync(await req.json());
 
-    // delete net asset
+    // delete net asset property
     for (const account of body.property_list) {
       await sql`
         delete from net_asset
@@ -33,6 +33,14 @@ export async function PUT(req: NextRequest) {
       await sql`
         insert into net_asset (account_id, type)
         values (${account.account_id}, 2)
+      `;
+    }
+
+    // delete net asset debt
+    for (const account of body.debt_list) {
+      await sql`
+        delete from net_asset
+        where account_id = ${account.account_id}
       `;
     }
     // insert debt
